@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minnesota Sports Card Shows</title>
+  <meta name="description" content="Minnesota sports card shows: list + calendar with month navigation and map previews." />
+  <style>
+    :root {
+      --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --text:#eef2ff;
+      --line:#22283a; --accent:#7aa2ff;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #1a2450 0%, transparent 60%),
+        radial-gradient(900px 500px at 110% 10%, #3a1a4f 0%, transparent 55%),
+        var(--bg);
+      color: var(--text);
+    }
+    header { max-width:1180px; margin:0 auto; padding: 26px 18px 10px; }
+    h1 { margin:0 0 6px; font-size: 26px; letter-spacing:.2px; }
+    .sub { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .wrap { max-width:1180px; margin:0 auto; padding: 12px 18px 40px; }
+
+    /* Tabs / Toggle */
+    .tabs { display:flex; gap:10px; margin: 14px 0 12px; }
+    .tab {
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-size: 13px;
+    }
+    .tab.active {
+      border-color: rgba(122,162,255,0.65);
+      box-shadow: 0 0 0 3px rgba(122,162,255,0.08) inset;
+    }
+
+    /* Controls */
+    .controls {
+      display:grid;
+      grid-template-columns: 1.4fr .8fr .8fr .8fr;
+      gap: 10px;
+      margin: 10px 0 16px;
+    }
+    input, select, button {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    input::placeholder { color:#6f7b8a; }
+    button { cursor:pointer; }
+    button:hover { border-color: rgba(122,162,255,0.5); }
+
+    .meta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+    .pill { display:inline-flex; gap:8px; align-items:center; padding: 7px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,0.02); color: var(--muted); font-size: 12px; }
+
+    /* List cards */
+    .listWrap { display:none; }
+    .listWrap.active { display:block; }
+    .listGrid { display:grid; grid-template-columns: 1fr; gap: 12px; }
+
+    .eventCard {
+      background: rgba(18,22,34,0.85);
+      border:1px solid var(--line);
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      display:grid;
+      grid-template-columns: 1.15fr .85fr; /* left info, right map */
+      min-height: 190px;
+    }
+    .eventInfo { padding: 14px; }
+    .titleRow { display:flex; gap:10px; justify-content:space-between; align-items:flex-start; }
+    .title { margin:0 0 6px; font-size: 15px; }
+    .k { color: var(--muted); font-size: 12px; }
+    .v { font-size: 13px; }
+
+    .row { margin: 6px 0 0; }
+    .tags { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .tag { font-size: 11px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); color: #c8d1ff; white-space:nowrap; }
+    .tag.sports { border-color: rgba(122,162,255,0.45); }
+    .tag.tcg { border-color: rgba(255,122,200,0.40); color: #ffd1ee; }
+    .tag.collectibles { border-color: rgba(120,255,200,0.35); color: #d8ffef; }
+
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); color: var(--muted); white-space:nowrap; }
+    .badge.fresh { border-color: rgba(120,255,200,0.45); color:#d8ffef; }
+    .badge.aging { border-color: rgba(255,220,120,0.45); color:#fff0c7; }
+    .badge.stale { border-color: rgba(255,120,120,0.45); color:#ffd0d0; }
+
+    .actions { display:flex; gap:10px; margin-top: 10px; flex-wrap:wrap; }
+    a.action {
+      display:inline-flex; align-items:center; gap:8px;
+      text-decoration:none; color: var(--text);
+      border:1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.02);
+    }
+    a.action:hover { border-color: rgba(122,162,255,0.5); }
+
+    .mapPane {
+      border-left: 1px solid var(--line);
+      background: rgba(255,255,255,0.01);
+      position: relative;
+      min-height: 190px;
+    }
+    .mapPane iframe {
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+    .mapOverlay {
+      position:absolute;
+      left:10px; top:10px;
+      background: rgba(18,22,34,0.85);
+      border:1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Calendar */
+    .calWrap { display:none; }
+    .calWrap.active { display:block; }
+
+    .calHeader { display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 6px 0 12px; }
+    .calTitle { font-size: 15px; color: var(--text); }
+    .calNav { display:flex; gap:8px; }
+    .calGrid {
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px;
+      background: rgba(18,22,34,0.55);
+    }
+    .dow { color: var(--muted); font-size: 11px; padding: 4px 6px; text-transform:uppercase; letter-spacing:.6px; }
+    .day {
+      min-height: 90px;
+      border:1px solid rgba(34,40,58,0.7);
+      border-radius: 14px;
+      padding: 8px;
+      cursor:pointer;
+      background: rgba(255,255,255,0.01);
+    }
+    .day:hover { border-color: rgba(122,162,255,0.35); }
+    .day.muted { opacity: .45; }
+    .dayNum { font-size: 12px; color: var(--muted); }
+    .dots { display:flex; gap:4px; flex-wrap:wrap; margin-top: 6px; }
+    .dot { width:8px; height:8px; border-radius:999px; border:1px solid var(--line); }
+    .dot.sports { border-color: rgba(122,162,255,0.65); }
+    .dot.tcg { border-color: rgba(255,122,200,0.65); }
+    .dot.collectibles { border-color: rgba(120,255,200,0.55); }
+
+    .drawer {
+      margin-top: 12px;
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(18,22,34,0.65);
+    }
+    .drawerTitle { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+    .drawerTitle b { font-size: 14px; }
+    .mini { font-size: 12px; color: var(--muted); }
+    .drawerList { margin-top: 10px; display:grid; gap:10px; }
+
+    .empty { padding: 18px; border:1px dashed var(--line); border-radius: 18px; color: var(--muted); }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 12px; line-height:1.5; }
+
+    @media (max-width: 980px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .eventCard { grid-template-columns: 1fr; }
+      .mapPane { border-left:0; border-top:1px solid var(--line); min-height: 220px; }
+    }
+    @media (max-width: 620px) {
+      .controls { grid-template-columns: 1fr; }
+      .day { min-height: 78px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Minnesota Sports Card Shows</h1>
+  <div class="sub">
+    Toggle between list + calendar. List view includes a map preview for each show (no API key required).
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- Step 1: Toggle -->
+  <div class="tabs">
+    <button class="tab active" id="tabList">List</button>
+    <button class="tab" id="tabCal">Calendar</button>
+  </div>
+
+  <!-- Filters (apply to both views) -->
+  <div class="controls">
+    <input id="q" placeholder="Search (e.g., 'Maplewood', 'RiverCentre', 'Shakopee')" />
+    <select id="city">
+      <option value="">All cities</option>
+    </select>
+    <select id="type">
+      <option value="">All categories</option>
+      <option value="sports">Sports</option>
+      <option value="tcg">TCG</option>
+      <option value="collectibles">Collectibles</option>
+    </select>
+    <select id="sort">
+      <option value="asc">Sort: soonest</option>
+      <option value="desc">Sort: latest</option>
+    </select>
+  </div>
+
+  <div class="meta">
+    <div class="pill" id="countPill">0 events</div>
+    <div class="pill">Time zone: America/Chicago</div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div class="listWrap active" id="listWrap">
+    <div id="list" class="listGrid"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div class="calWrap" id="calWrap">
+    <div class="calHeader">
+      <div class="calTitle" id="calTitle">Month</div>
+      <div class="calNav">
+        <!-- Step 3: Month navigation -->
+        <button id="prevMonth">◀</button>
+        <button id="today">Today</button>
+        <button id="nextMonth">▶</button>
+      </div>
+    </div>
+
+    <div class="calGrid" id="calGrid"></div>
+
+    <div class="drawer" id="drawer">
+      <div class="drawerTitle">
+        <b id="drawerDate">Select a day</b>
+        <span class="mini" id="drawerMeta"></span>
+      </div>
+      <div class="drawerList" id="drawerList">
+        <div class="mini">Click a day in the calendar to see events.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Tip: If a map doesn’t render, open the “Map” link (it will always work).
+  </footer>
+</div>
+
+<script>
+/**
+ * Minimal example dataset.
+ * You can add more events here. For recurring events, add multiple entries or build a generator later.
+ * Required: title, type, venue, address, city, start, end (or null), url, last_verified
+ */
+const EVENTS = [
+  {
+    title: "Sports Card Show at the Bowl",
+    type: "sports",
+    venue: "Shakopee Bowl",
+    address: "1224 3rd Ave W, Shakopee, MN 55379",
+    city: "Shakopee",
+    start: "2026-02-22T09:00:00-06:00",
+    end:   "2026-02-22T11:00:00-06:00",
+    url: "https://shakopeebowl.com/sports-card-show",
+    last_verified: "2026-02-17"
+  },
+  {
+    title: "Twin Cities Sports Collectors Club Show",
+    type: "sports",
+    venue: "Bloomington Armory",
+    address: "3300 W 98th St, Bloomington, MN 55431",
+    city: "Bloomington",
+    start: "2026-03-21T09:00:00-05:00",
+    end:   "2026-03-21T16:00:00-05:00",
+    url: "https://www.tcscc.org/",
+    last_verified: "2026-02-17"
+  },
+  {
+    title: "Minnesota Card Show (Apr 2026)",
+    type: "collectibles",
+    venue: "Saint Paul RiverCentre",
+    address: "175 Kellogg Blvd, St Paul, MN 55102",
+    city: "St. Paul",
+    start: "2026-04-16T09:00:00-05:00",
+    end:   "2026-04-19T15:00:00-05:00",
+    url: "https://www.cardshowmn.com/event-details/minnesota-card-show-2026-april",
+    last_verified: "2026-02-17",
+    notes: "Multi-day time range; confirm daily hours on organizer page."
+  }
+];
+
+// -------- DOM --------
+const $q = document.getElementById('q');
+const $city = document.getElementById('city');
+const $type = document.getElementById('type');
+const $sort = document.getElementById('sort');
+const $countPill = document.getElementById('countPill');
+
+const $tabList = document.getElementById('tabList');
+const $tabCal = document.getElementById('tabCal');
+const $listWrap = document.getElementById('listWrap');
+const $calWrap = document.getElementById('calWrap');
+
+const $list = document.getElementById('list');
+
+const $calTitle = document.getElementById('calTitle');
+const $calGrid = document.getElementById('calGrid');
+const $prevMonth = document.getElementById('prevMonth');
+const $nextMonth = document.getElementById('nextMonth');
+const $todayBtn = document.getElementById('today');
+
+const $drawerDate = document.getElementById('drawerDate');
+const $drawerMeta = document.getElementById('drawerMeta');
+const $drawerList = document.getElementById('drawerList');
+
+// -------- helpers --------
+function uniq(arr) { return [...new Set(arr)].sort((a,b)=>a.localeCompare(b)); }
+
+function formatWhen(ev) {
+  const start = ev.start ? new Date(ev.start) : null;
+  const end = ev.end ? new Date(ev.end) : null;
+  if (!start) return "TBD";
+
+  const dateFmt = new Intl.DateTimeFormat('en-US', { weekday:'short', year:'numeric', month:'short', day:'2-digit' });
+  const timeFmt = new Intl.DateTimeFormat('en-US', { hour:'numeric', minute:'2-digit' });
+
+  const d = dateFmt.format(start);
+  const t1 = timeFmt.format(start);
+
+  if (!end) return `${d} • ${t1} – TBD`;
+
+  const sameDay = start.toDateString() === end.toDateString();
+  if (sameDay) return `${d} • ${t1} – ${timeFmt.format(end)}`;
+
+  return `${dateFmt.format(start)} ${timeFmt.format(start)} → ${dateFmt.format(end)} ${timeFmt.format(end)}`;
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return Infinity;
+  const d = new Date(dateStr + "T00:00:00");
+  const now = new Date();
+  return Math.floor((now - d) / (1000*60*60*24));
+}
+
+function freshnessBadge(lastVerified) {
+  const d = daysSince(lastVerified);
+  if (!isFinite(d)) return { cls:"stale", label:"Unverified" };
+  if (d <= 30) return { cls:"fresh", label:`Fresh (${d}d)` };
+  if (d <= 90) return { cls:"aging", label:`Aging (${d}d)` };
+  return { cls:"stale", label:`Stale (${d}d)` };
+}
+
+function googleMapsEmbedSrc(query) {
+  // No API key required; uses public embed endpoint.
+  // Note: Some environments can block embeds; the "Map" link will still work.
+  const q = encodeURIComponent(query);
+  return `https://www.google.com/maps?q=${q}&output=embed`;
+}
+
+function googleMapsLink(query) {
+  const q = encodeURIComponent(query);
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
+
+function eventKeyLocalDay(ev) {
+  if (!ev.start) return null;
+  const d = new Date(ev.start);
+  const pad = (n)=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+// -------- filtering/sorting --------
+function filteredEvents() {
+  const q = ($q.value || "").trim().toLowerCase();
+  const city = $city.value;
+  const type = $type.value;
+  const sort = $sort.value;
+
+  let items = EVENTS.slice();
+
+  if (q) {
+    items = items.filter(ev =>
+      (ev.title||"").toLowerCase().includes(q) ||
+      (ev.venue||"").toLowerCase().includes(q) ||
+      (ev.address||"").toLowerCase().includes(q) ||
+      (ev.city||"").toLowerCase().includes(q) ||
+      (ev.type||"").toLowerCase().includes(q) ||
+      (ev.notes||"").toLowerCase().includes(q)
+    );
+  }
+  if (city) items = items.filter(ev => ev.city === city);
+  if (type) items = items.filter(ev => ev.type === type);
+
+  items.sort((a,b) => {
+    const da = a.start ? new Date(a.start).getTime() : Infinity;
+    const db = b.start ? new Date(b.start).getTime() : Infinity;
+    return sort === "asc" ? da - db : db - da;
+  });
+
+  return items;
+}
+
+function initCities() {
+  const cities = uniq(EVENTS.map(e=>e.city).filter(Boolean));
+  for (const c of cities) {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    $city.appendChild(o);
+  }
+}
+
+// -------- Step 1: Toggle views --------
+function setView(view) {
+  if (view === "list") {
+    $tabList.classList.add("active");
+    $tabCal.classList.remove("active");
+    $listWrap.classList.add("active");
+    $calWrap.classList.remove("active");
+  } else {
+    $tabCal.classList.add("active");
+    $tabList.classList.remove("active");
+    $calWrap.classList.add("active");
+    $listWrap.classList.remove("active");
+    buildCalendar();
+  }
+}
+
+$tabList.addEventListener('click', ()=>setView("list"));
+$tabCal.addEventListener('click', ()=>setView("cal"));
+
+// -------- Step 2: List view with map on right --------
+function renderList() {
+  const items = filteredEvents();
+  $countPill.textContent = `${items.length} event${items.length===1?"":"s"}`;
+  $list.innerHTML = "";
+
+  if (!items.length) {
+    const d = document.createElement('div');
+    d.className = "empty";
+    d.textContent = "No events match your filters.";
+    $list.appendChild(d);
+    return;
+  }
+
+  for (const ev of items) {
+    const card = document.createElement('div');
+    card.className = "eventCard";
+
+    const info = document.createElement('div');
+    info.className = "eventInfo";
+
+    const titleRow = document.createElement('div');
+    titleRow.className = "titleRow";
+
+    const left = document.createElement('div');
+    const t = document.createElement('h3');
+    t.className = "title";
+    t.textContent = ev.title;
+
+    const when = document.createElement('div');
+    when.className = "row";
+    when.innerHTML = `<span class="k">When:</span> <span class="v">${formatWhen(ev)}</span>`;
+
+    const where = document.createElement('div');
+    where.className = "row";
+    where.innerHTML = `<span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span>`;
+
+    const ver = document.createElement('div');
+    ver.className = "row";
+    const fb = freshnessBadge(ev.last_verified);
+    ver.innerHTML = `<span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span>`;
+
+    const notes = document.createElement('div');
+    if (ev.notes) {
+      notes.className = "row";
+      notes.innerHTML = `<span class="k">Notes:</span> <span class="v">${ev.notes}</span>`;
+    }
+
+    left.appendChild(t);
+    left.appendChild(when);
+    left.appendChild(where);
+    left.appendChild(ver);
+    if (ev.notes) left.appendChild(notes);
+
+    const right = document.createElement('div');
+    right.className = "tags";
+
+    const tag = document.createElement('span');
+    tag.className = `tag ${ev.type || ""}`;
+    tag.textContent = (ev.type || "show").toUpperCase();
+
+    const badge = document.createElement('span');
+    badge.className = `badge ${fb.cls}`;
+    badge.textContent = fb.label;
+
+    right.appendChild(tag);
+    right.appendChild(badge);
+
+    titleRow.appendChild(left);
+    titleRow.appendChild(right);
+
+    const actions = document.createElement('div');
+    actions.className = "actions";
+
+    const query = `${ev.venue} ${ev.address}`;
+    const mapA = document.createElement('a');
+    mapA.className = "action";
+    mapA.href = googleMapsLink(query);
+    mapA.target = "_blank";
+    mapA.rel = "noopener noreferrer";
+    mapA.textContent = "Map";
+
+    const orgA = document.createElement('a');
+    orgA.className = "action";
+    orgA.href = ev.url || "#";
+    orgA.target = "_blank";
+    orgA.rel = "noopener noreferrer";
+    orgA.textContent = "Organizer";
+
+    actions.appendChild(mapA);
+    if (ev.url) actions.appendChild(orgA);
+
+    info.appendChild(titleRow);
+    info.appendChild(actions);
+
+    const mapPane = document.createElement('div');
+    mapPane.className = "mapPane";
+
+    const overlay = document.createElement('div');
+    overlay.className = "mapOverlay";
+    overlay.textContent = "Map preview";
+
+    const iframe = document.createElement('iframe');
+    iframe.loading = "lazy";
+    iframe.referrerPolicy = "no-referrer-when-downgrade";
+    iframe.src = googleMapsEmbedSrc(query);
+    iframe.title = `Map - ${ev.title}`;
+
+    mapPane.appendChild(iframe);
+    mapPane.appendChild(overlay);
+
+    card.appendChild(info);
+    card.appendChild(mapPane);
+
+    $list.appendChild(card);
+  }
+}
+
+// -------- Step 3: Calendar with month navigation --------
+let calCursor = new Date();
+calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth(), 1);
+let selectedDayKey = null;
+
+function monthLabel(d) {
+  return new Intl.DateTimeFormat('en-US', { month:'long', year:'numeric' }).format(d);
+}
+
+function buildCalendar() {
+  const items = filteredEvents();
+
+  const byDay = new Map();
+  for (const ev of items) {
+    const k = eventKeyLocalDay(ev);
+    if (!k) continue;
+    if (!byDay.has(k)) byDay.set(k, []);
+    byDay.get(k).push(ev);
+  }
+
+  $calTitle.textContent = monthLabel(calCursor);
+  $calGrid.innerHTML = "";
+
+  const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  for (const d of dows) {
+    const el = document.createElement('div');
+    el.className = "dow";
+    el.textContent = d;
+    $calGrid.appendChild(el);
+  }
+
+  const first = new Date(calCursor.getFullYear(), calCursor.getMonth(), 1);
+  const startDow = first.getDay();
+  const startDate = new Date(first);
+  startDate.setDate(first.getDate() - startDow); // Sunday before the 1st
+
+  for (let i=0; i<42; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const inMonth = d.getMonth() === calCursor.getMonth();
+
+    const pad = (n)=>String(n).padStart(2,'0');
+    const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+    const cell = document.createElement('div');
+    cell.className = "day" + (inMonth ? "" : " muted");
+
+    const num = document.createElement('div');
+    num.className = "dayNum";
+    num.textContent = d.getDate();
+
+    const dots = document.createElement('div');
+    dots.className = "dots";
+
+    const evs = byDay.get(key) || [];
+    for (const ev of evs.slice(0, 6)) {
+      const dot = document.createElement('div');
+      dot.className = "dot " + (ev.type || "");
+      dots.appendChild(dot);
+    }
+
+    cell.appendChild(num);
+    if (evs.length) cell.appendChild(dots);
+
+    cell.addEventListener('click', ()=>selectDay(key, evs));
+
+    $calGrid.appendChild(cell);
+  }
+
+  // auto-select a day
+  if (!selectedDayKey) {
+    const now = new Date();
+    const pad = (n)=>String(n).padStart(2,'0');
+    const todayKey = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    const monthPrefix = `${calCursor.getFullYear()}-${pad(calCursor.getMonth()+1)}`;
+
+    if (todayKey.startsWith(monthPrefix)) {
+      selectDay(todayKey, byDay.get(todayKey) || []);
+    } else {
+      const firstKeyWithEvents = [...byDay.keys()].find(k => k.startsWith(monthPrefix));
+      if (firstKeyWithEvents) selectDay(firstKeyWithEvents, byDay.get(firstKeyWithEvents) || []);
+      else selectDay(null, []);
+    }
+  } else {
+    selectDay(selectedDayKey, byDay.get(selectedDayKey) || [], true);
+  }
+}
+
+function selectDay(key, evs) {
+  selectedDayKey = key;
+
+  if (!key) {
+    $drawerDate.textContent = "Select a day";
+    $drawerMeta.textContent = "";
+    $drawerList.innerHTML = `<div class="mini">No day selected.</div>`;
+    return;
+  }
+
+  const d = new Date(key + "T00:00:00");
+  const label = new Intl.DateTimeFormat('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }).format(d);
+  $drawerDate.textContent = label;
+  $drawerMeta.textContent = `${evs.length} event${evs.length===1?"":"s"}`;
+
+  $drawerList.innerHTML = "";
+  if (!evs.length) {
+    $drawerList.innerHTML = `<div class="mini">No events on this day (with current filters).</div>`;
+    return;
+  }
+
+  evs = evs.slice().sort((a,b)=>new Date(a.start).getTime() - new Date(b.start).getTime());
+
+  for (const ev of evs) {
+    const box = document.createElement('div');
+    box.className = "card";
+    box.style.boxShadow = "none";
+    box.style.background = "rgba(18,22,34,0.55)";
+
+    const fb = freshnessBadge(ev.last_verified);
+
+    box.innerHTML = `
+      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:flex-start;">
+        <div>
+          <div class="title" style="margin:0 0 6px;">${ev.title}</div>
+          <div class="row"><span class="k">When:</span> <span class="v">${formatWhen(ev)}</span></div>
+          <div class="row"><span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span></div>
+          <div class="row"><span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span></div>
+        </div>
+        <div class="tags">
+          <span class="tag ${ev.type || ""}">${(ev.type || "show").toUpperCase()}</span>
+          <span class="badge ${fb.cls}">${fb.label}</span>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="action" href="${googleMapsLink(ev.venue + " " + ev.address)}" target="_blank" rel="noopener noreferrer">Map</a>
+        ${ev.url ? `<a class="action" href="${ev.url}" target="_blank" rel="noopener noreferrer">Organizer</a>` : ""}
+      </div>
+    `;
+
+    $drawerList.appendChild(box);
+  }
+}
+
+// Month nav buttons
+$prevMonth.addEventListener('click', ()=>{
+  calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()-1, 1);
+  selectedDayKey = null;
+  buildCalendar();
+});
+$nextMonth.addEventListener('click', ()=>{
+  calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()+1, 1);
+  selectedDayKey = null;
+  buildCalendar();
+});
+$todayBtn.addEventListener('click', ()=>{
+  const now = new Date();
+  calCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+  selectedDayKey = null;
+  buildCalendar();
+});
+
+// Inputs re-render both views
+function rerenderAll() {
+  renderList();
+  if ($calWrap.classList.contains("active")) buildCalendar();
+}
+$q.addEventListener('input', rerenderAll);
+$city.addEventListener('change', rerenderAll);
+$type.addEventListener('change', rerenderAll);
+$sort.addEventListener('change', rerenderAll);
+
+// init
+initCities();
+renderList();
+</script>
+</body>
+</html>
