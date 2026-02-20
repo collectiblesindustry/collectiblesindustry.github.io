@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Midwest Card Shows</title>
-  <meta name="description" content="Midwest card shows — list + calendar with map previews and month navigation." />
+  <meta name="description" content="Midwest card shows — list + calendar with map previews, visible event titles, and month navigation." />
   <style>
     :root { --bg:#0b0d12; --muted:#9aa4b2; --text:#eef2ff; --line:#22283a; --accent:#7aa2ff; }
     * { box-sizing:border-box; }
@@ -50,6 +50,7 @@
     .pill{ display:inline-flex; gap:8px; align-items:center; padding:7px 10px; border-radius:999px; border:1px solid var(--line);
            background:rgba(255,255,255,0.02); color:var(--muted); font-size:12px; }
 
+    /* List */
     .listWrap{ display:none; }
     .listWrap.active{ display:block; }
     .listGrid{ display:grid; grid-template-columns:1fr; gap:12px; }
@@ -114,6 +115,7 @@
       text-align:center;
     }
 
+    /* Calendar */
     .calWrap{ display:none; }
     .calWrap.active{ display:block; }
     .calHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 12px; }
@@ -128,21 +130,42 @@
     }
     .dow{ color:var(--muted); font-size:11px; padding:4px 6px; text-transform:uppercase; letter-spacing:.6px; }
     .day{
-      min-height:90px;
+      min-height:110px;
       border:1px solid rgba(34,40,58,0.7);
       border-radius:14px;
       padding:8px;
       cursor:pointer;
       background:rgba(255,255,255,0.01);
+      overflow:hidden;
     }
     .day:hover{ border-color:rgba(122,162,255,0.35); }
     .day.muted{ opacity:.45; }
     .dayNum{ font-size:12px; color:var(--muted); }
-    .dots{ display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
-    .dot{ width:8px; height:8px; border-radius:999px; border:1px solid var(--line); }
-    .dot.sports{ border-color:rgba(122,162,255,0.65); }
-    .dot.tcg{ border-color:rgba(255,122,200,0.65); }
-    .dot.collectibles{ border-color:rgba(120,255,200,0.55); }
+
+    /* NEW: visible event rows in calendar cells */
+    .dayEvents { margin-top: 6px; display: grid; gap: 4px; }
+    .dayEvent {
+      border: 1px solid rgba(34,40,58,0.9);
+      border-radius: 10px;
+      padding: 4px 6px;
+      background: rgba(18,22,34,0.45);
+      font-size: 11px;
+      line-height: 1.2;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .dayEvent .time { color: var(--muted); margin-right: 6px; }
+    .dayEvent.sports { border-color: rgba(122,162,255,0.45); }
+    .dayEvent.tcg { border-color: rgba(255,122,200,0.40); }
+    .dayEvent.collectibles { border-color: rgba(120,255,200,0.35); }
+    .moreLink {
+      font-size: 11px;
+      color: var(--accent);
+      margin-top: 2px;
+      width: fit-content;
+    }
+    .moreLink:hover { text-decoration: underline; }
 
     .drawer{
       margin-top:12px;
@@ -165,14 +188,14 @@
     }
     @media (max-width: 620px){
       .controls{ grid-template-columns:1fr; }
-      .day{ min-height:78px; }
+      .day{ min-height:96px; }
     }
   </style>
 </head>
 <body>
 <header>
   <h1>Midwest Card Shows</h1>
-  <div class="sub">All shows live in <code>events.json</code>. Filter by state/city/category; view in list or calendar.</div>
+  <div class="sub">All shows live in <code>events.json</code>. Calendar view displays event titles directly on each day.</div>
 </header>
 
 <div class="wrap">
@@ -199,7 +222,7 @@
 
   <div class="meta">
     <div class="pill" id="countPill">0 events</div>
-    <div class="pill">Tip: add <code>?v=7</code> to the URL to bust cache after changes</div>
+    <div class="pill">Tip: add <code>?v=8</code> to the URL to bust cache after updates</div>
   </div>
 
   <div class="listWrap active" id="listWrap"><div id="list" class="listGrid"></div></div>
@@ -221,7 +244,7 @@
         <span class="mini" id="drawerMeta"></span>
       </div>
       <div class="drawerList" id="drawerList">
-        <div class="mini">Click a day in the calendar to see events.</div>
+        <div class="mini">Click a day in the calendar to see all events for that day.</div>
       </div>
     </div>
   </div>
@@ -258,6 +281,15 @@ const $drawerList = document.getElementById('drawerList');
 // ---------- helpers ----------
 function uniq(arr){ return [...new Set(arr)].sort((a,b)=>a.localeCompare(b)); }
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function formatWhen(ev){
   const start = ev.start ? new Date(ev.start) : null;
   const end = ev.end ? new Date(ev.end) : null;
@@ -271,6 +303,11 @@ function formatWhen(ev){
   const sameDay = start.toDateString() === end.toDateString();
   if(sameDay) return `${d} • ${t1} – ${timeFmt.format(end)}`;
   return `${dateFmt.format(start)} ${timeFmt.format(start)} → ${dateFmt.format(end)} ${timeFmt.format(end)}`;
+}
+
+function formatTimeOnly(iso){
+  if(!iso) return "";
+  return new Intl.DateTimeFormat('en-US',{ hour:'numeric', minute:'2-digit' }).format(new Date(iso));
 }
 
 function daysSince(dateStr){
@@ -288,7 +325,6 @@ function freshnessBadge(lastVerified){
 }
 
 function osmStaticMapUrl(lat, lon){
-  // Free static map (no API key). If this endpoint ever rate-limits, we can swap providers.
   const center = `${lat},${lon}`;
   return `https://staticmap.openstreetmap.de/staticmap.php?center=${center}&zoom=13&size=600x360&markers=${center},red-pushpin`;
 }
@@ -298,11 +334,15 @@ function mapsLink(ev){
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
-function eventKeyLocalDay(ev){
-  if(!ev.start) return null;
-  const d = new Date(ev.start);
+function eventKeyLocalDayFromISO(iso){
+  if(!iso) return null;
+  const d = new Date(iso);
   const pad = (n)=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function eventKeyLocalDay(ev){
+  return eventKeyLocalDayFromISO(ev.start);
 }
 
 // ---------- filters ----------
@@ -340,13 +380,11 @@ function filteredEvents(){
 }
 
 function rebuildDropdowns(){
-  // States
   const states = uniq(EVENTS.map(e=>e.state).filter(Boolean));
   const prevState = $state.value;
   $state.innerHTML = `<option value="">All states</option>` + states.map(s=>`<option value="${s}">${s}</option>`).join("");
   $state.value = states.includes(prevState) ? prevState : "";
 
-  // Cities (dependent on state)
   const pool = $state.value ? EVENTS.filter(e=>e.state === $state.value) : EVENTS;
   const cities = uniq(pool.map(e=>e.city).filter(Boolean));
   const prevCity = $city.value;
@@ -398,20 +436,20 @@ function renderList(){
     info.innerHTML = `
       <div class="titleRow">
         <div>
-          <h3 class="title">${ev.title}</h3>
-          <div class="row"><span class="k">When:</span> <span class="v">${formatWhen(ev)}</span></div>
-          <div class="row"><span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span></div>
-          <div class="row"><span class="k">Area:</span> <span class="v">${ev.city}, ${ev.state}</span></div>
-          <div class="row"><span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span></div>
-          ${ev.notes ? `<div class="row"><span class="k">Notes:</span> <span class="v">${ev.notes}</span></div>` : ""}
+          <h3 class="title">${escapeHtml(ev.title)}</h3>
+          <div class="row"><span class="k">When:</span> <span class="v">${escapeHtml(formatWhen(ev))}</span></div>
+          <div class="row"><span class="k">Where:</span> <span class="v">${escapeHtml(ev.venue)} — ${escapeHtml(ev.address)}</span></div>
+          <div class="row"><span class="k">Area:</span> <span class="v">${escapeHtml(ev.city)}, ${escapeHtml(ev.state)}</span></div>
+          <div class="row"><span class="k">Last verified:</span> <span class="v">${escapeHtml(ev.last_verified || "Unknown")}</span></div>
+          ${ev.notes ? `<div class="row"><span class="k">Notes:</span> <span class="v">${escapeHtml(ev.notes)}</span></div>` : ""}
           <div class="actions">
             <a class="action" href="${mapsLink(ev)}" target="_blank" rel="noopener noreferrer">Map</a>
             ${ev.url ? `<a class="action" href="${ev.url}" target="_blank" rel="noopener noreferrer">Organizer</a>` : ""}
           </div>
         </div>
         <div class="rightBadges">
-          <span class="tag ${ev.category || ""}">${(ev.category || "show").toUpperCase()}</span>
-          <span class="badge ${fb.cls}">${fb.label}</span>
+          <span class="tag ${ev.category || ""}">${escapeHtml((ev.category || "show").toUpperCase())}</span>
+          <span class="badge ${fb.cls}">${escapeHtml(fb.label)}</span>
         </div>
       </div>
     `;
@@ -492,18 +530,42 @@ function buildCalendar(){
     num.className = "dayNum";
     num.textContent = d.getDate();
 
-    const dots = document.createElement('div');
-    dots.className = "dots";
-
     const evs = byDay.get(key) || [];
-    for(const ev of evs.slice(0,6)){
-      const dot = document.createElement('div');
-      dot.className = "dot " + (ev.category || "");
-      dots.appendChild(dot);
-    }
 
     cell.appendChild(num);
-    if(evs.length) cell.appendChild(dots);
+
+    // NEW: show events directly on calendar day cells
+    if (evs.length) {
+      const wrap = document.createElement('div');
+      wrap.className = "dayEvents";
+
+      const sorted = evs.slice().sort((a,b)=>new Date(a.start) - new Date(b.start));
+      const MAX_SHOW = 2;
+
+      for (const ev of sorted.slice(0, MAX_SHOW)) {
+        const line = document.createElement('div');
+        line.className = `dayEvent ${ev.category || ""}`;
+        const t = formatTimeOnly(ev.start);
+
+        line.innerHTML = `<span class="time">${escapeHtml(t)}</span>${escapeHtml(ev.title)}`;
+        line.title = `${ev.title} | ${t} | ${ev.city}, ${ev.state}`;
+
+        wrap.appendChild(line);
+      }
+
+      if (sorted.length > MAX_SHOW) {
+        const more = document.createElement('div');
+        more.className = "moreLink";
+        more.textContent = `+${sorted.length - MAX_SHOW} more`;
+        more.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectDay(key, evs);
+        });
+        wrap.appendChild(more);
+      }
+
+      cell.appendChild(wrap);
+    }
 
     cell.addEventListener('click', ()=>selectDay(key, evs));
     $calGrid.appendChild(cell);
@@ -559,13 +621,14 @@ function selectDay(key, evs){
     box.innerHTML = `
       <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
         <div>
-          <div style="font-size:14px; margin-bottom:6px;">${ev.title}</div>
-          <div class="mini">${formatWhen(ev)} • ${ev.city}, ${ev.state}</div>
-          <div class="mini">${ev.venue}</div>
+          <div style="font-size:14px; margin-bottom:6px;">${escapeHtml(ev.title)}</div>
+          <div class="mini">${escapeHtml(formatWhen(ev))} • ${escapeHtml(ev.city)}, ${escapeHtml(ev.state)}</div>
+          <div class="mini">${escapeHtml(ev.venue)}</div>
+          <div class="mini">Last verified: ${escapeHtml(ev.last_verified || "Unknown")}</div>
         </div>
         <div class="rightBadges">
-          <span class="tag ${ev.category||""}">${(ev.category||"show").toUpperCase()}</span>
-          <span class="badge ${fb.cls}">${fb.label}</span>
+          <span class="tag ${ev.category||""}">${escapeHtml((ev.category||"show").toUpperCase())}</span>
+          <span class="badge ${fb.cls}">${escapeHtml(fb.label)}</span>
         </div>
       </div>
       <div class="actions" style="margin-top:10px;">
@@ -605,6 +668,9 @@ $state.addEventListener('change', rerenderAll);
 $city.addEventListener('change', rerenderAll);
 $category.addEventListener('change', rerenderAll);
 $sort.addEventListener('change', rerenderAll);
+
+// When state changes, reset city if it no longer exists in state pool
+$state.addEventListener('change', ()=>{ $city.value = ""; rerenderAll(); });
 
 // ---------- load data ----------
 async function loadEvents(){
