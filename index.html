@@ -3,220 +3,189 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minnesota Sports Card Shows</title>
-  <meta name="description" content="Minnesota sports card shows: list + calendar with month navigation and map previews." />
+  <title>Midwest Card Shows</title>
+  <meta name="description" content="Midwest card shows — list + calendar with map previews and month navigation." />
   <style>
-    :root {
-      --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --text:#eef2ff;
-      --line:#22283a; --accent:#7aa2ff;
-    }
+    :root { --bg:#0b0d12; --muted:#9aa4b2; --text:#eef2ff; --line:#22283a; --accent:#7aa2ff; }
     * { box-sizing:border-box; }
-    body {
+    body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
         radial-gradient(1200px 600px at 20% -10%, #1a2450 0%, transparent 60%),
         radial-gradient(900px 500px at 110% 10%, #3a1a4f 0%, transparent 55%),
         var(--bg);
-      color: var(--text);
+      color:var(--text);
     }
-    header { max-width:1180px; margin:0 auto; padding: 26px 18px 10px; }
-    h1 { margin:0 0 6px; font-size: 26px; letter-spacing:.2px; }
-    .sub { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    header{ max-width:1180px; margin:0 auto; padding:26px 18px 10px; }
+    h1{ margin:0 0 6px; font-size:26px; letter-spacing:.2px; }
+    .sub{ color:var(--muted); font-size:13px; line-height:1.45; }
 
-    .wrap { max-width:1180px; margin:0 auto; padding: 12px 18px 40px; }
+    .wrap{ max-width:1180px; margin:0 auto; padding:12px 18px 40px; }
+    .tabs{ display:flex; gap:10px; margin:14px 0 12px; }
+    .tab{
+      border:1px solid var(--line); background:rgba(255,255,255,0.02); color:var(--text);
+      padding:9px 12px; border-radius:999px; cursor:pointer; font-size:13px;
+    }
+    .tab.active{ border-color:rgba(122,162,255,0.65); box-shadow:0 0 0 3px rgba(122,162,255,0.08) inset; }
 
-    /* Tabs / Toggle */
-    .tabs { display:flex; gap:10px; margin: 14px 0 12px; }
-    .tab {
+    .controls{
+      display:grid; grid-template-columns: 1.2fr .7fr .7fr .7fr .7fr;
+      gap:10px; margin:10px 0 16px;
+    }
+    input, select, button{
+      background:rgba(255,255,255,0.03);
       border:1px solid var(--line);
-      background: rgba(255,255,255,0.02);
-      color: var(--text);
-      padding: 9px 12px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-size: 13px;
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+      font-size:14px;
     }
-    .tab.active {
-      border-color: rgba(122,162,255,0.65);
-      box-shadow: 0 0 0 3px rgba(122,162,255,0.08) inset;
-    }
+    input::placeholder{ color:#6f7b8a; }
+    button{ cursor:pointer; }
+    button:hover{ border-color:rgba(122,162,255,0.5); }
 
-    /* Controls */
-    .controls {
-      display:grid;
-      grid-template-columns: 1.4fr .8fr .8fr .8fr;
-      gap: 10px;
-      margin: 10px 0 16px;
-    }
-    input, select, button {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--line);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 10px 12px;
-      outline: none;
-      font-size: 14px;
-    }
-    input::placeholder { color:#6f7b8a; }
-    button { cursor:pointer; }
-    button:hover { border-color: rgba(122,162,255,0.5); }
+    .meta{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .pill{ display:inline-flex; gap:8px; align-items:center; padding:7px 10px; border-radius:999px; border:1px solid var(--line);
+           background:rgba(255,255,255,0.02); color:var(--muted); font-size:12px; }
 
-    .meta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom: 10px; }
-    .pill { display:inline-flex; gap:8px; align-items:center; padding: 7px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,0.02); color: var(--muted); font-size: 12px; }
+    .listWrap{ display:none; }
+    .listWrap.active{ display:block; }
+    .listGrid{ display:grid; grid-template-columns:1fr; gap:12px; }
 
-    /* List cards */
-    .listWrap { display:none; }
-    .listWrap.active { display:block; }
-    .listGrid { display:grid; grid-template-columns: 1fr; gap: 12px; }
-
-    .eventCard {
-      background: rgba(18,22,34,0.85);
+    .eventCard{
+      background:rgba(18,22,34,0.85);
       border:1px solid var(--line);
-      border-radius: 18px;
+      border-radius:18px;
       overflow:hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      box-shadow:0 8px 30px rgba(0,0,0,0.35);
       display:grid;
-      grid-template-columns: 1.15fr .85fr; /* left info, right map */
-      min-height: 190px;
+      grid-template-columns: 1.15fr .85fr;
+      min-height:190px;
     }
-    .eventInfo { padding: 14px; }
-    .titleRow { display:flex; gap:10px; justify-content:space-between; align-items:flex-start; }
-    .title { margin:0 0 6px; font-size: 15px; }
-    .k { color: var(--muted); font-size: 12px; }
-    .v { font-size: 13px; }
+    .eventInfo{ padding:14px; }
+    .titleRow{ display:flex; gap:10px; justify-content:space-between; align-items:flex-start; }
+    .title{ margin:0 0 6px; font-size:15px; }
+    .k{ color:var(--muted); font-size:12px; }
+    .v{ font-size:13px; }
+    .row{ margin:6px 0 0; }
 
-    .row { margin: 6px 0 0; }
-    .tags { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
-    .tag { font-size: 11px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); color: #c8d1ff; white-space:nowrap; }
-    .tag.sports { border-color: rgba(122,162,255,0.45); }
-    .tag.tcg { border-color: rgba(255,122,200,0.40); color: #ffd1ee; }
-    .tag.collectibles { border-color: rgba(120,255,200,0.35); color: #d8ffef; }
+    .tag{ font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); color:#c8d1ff; white-space:nowrap; }
+    .tag.sports{ border-color:rgba(122,162,255,0.45); }
+    .tag.tcg{ border-color:rgba(255,122,200,0.40); color:#ffd1ee; }
+    .tag.collectibles{ border-color:rgba(120,255,200,0.35); color:#d8ffef; }
 
-    .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); color: var(--muted); white-space:nowrap; }
-    .badge.fresh { border-color: rgba(120,255,200,0.45); color:#d8ffef; }
-    .badge.aging { border-color: rgba(255,220,120,0.45); color:#fff0c7; }
-    .badge.stale { border-color: rgba(255,120,120,0.45); color:#ffd0d0; }
+    .badge{ font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
+    .badge.fresh{ border-color:rgba(120,255,200,0.45); color:#d8ffef; }
+    .badge.aging{ border-color:rgba(255,220,120,0.45); color:#fff0c7; }
+    .badge.stale{ border-color:rgba(255,120,120,0.45); color:#ffd0d0; }
 
-    .actions { display:flex; gap:10px; margin-top: 10px; flex-wrap:wrap; }
-    a.action {
-      display:inline-flex; align-items:center; gap:8px;
-      text-decoration:none; color: var(--text);
+    .rightBadges{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+
+    .actions{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+    a.action{
+      display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--text);
+      border:1px solid var(--line); border-radius:12px; padding:8px 10px; font-size:13px;
+      background:rgba(255,255,255,0.02);
+    }
+    a.action:hover{ border-color:rgba(122,162,255,0.5); }
+
+    .mapPane{ border-left:1px solid var(--line); background:rgba(255,255,255,0.01); position:relative; min-height:190px; }
+    .mapPane img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .mapOverlay{
+      position:absolute; left:10px; top:10px;
+      background:rgba(18,22,34,0.85);
       border:1px solid var(--line);
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-size: 13px;
-      background: rgba(255,255,255,0.02);
-    }
-    a.action:hover { border-color: rgba(122,162,255,0.5); }
-
-    .mapPane {
-      border-left: 1px solid var(--line);
-      background: rgba(255,255,255,0.01);
-      position: relative;
-      min-height: 190px;
-    }
-    .mapPane iframe {
-      width:100%;
-      height:100%;
-      border:0;
-      display:block;
-    }
-    .mapOverlay {
-      position:absolute;
-      left:10px; top:10px;
-      background: rgba(18,22,34,0.85);
-      border:1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      color: var(--muted);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
       backdrop-filter: blur(6px);
     }
-
-    /* Calendar */
-    .calWrap { display:none; }
-    .calWrap.active { display:block; }
-
-    .calHeader { display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 6px 0 12px; }
-    .calTitle { font-size: 15px; color: var(--text); }
-    .calNav { display:flex; gap:8px; }
-    .calGrid {
-      display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      border:1px solid var(--line);
-      border-radius: 18px;
-      padding: 10px;
-      background: rgba(18,22,34,0.55);
+    .mapMissing{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:12px;
+      text-align:center;
     }
-    .dow { color: var(--muted); font-size: 11px; padding: 4px 6px; text-transform:uppercase; letter-spacing:.6px; }
-    .day {
-      min-height: 90px;
+
+    .calWrap{ display:none; }
+    .calWrap.active{ display:block; }
+    .calHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 12px; }
+    .calTitle{ font-size:15px; }
+    .calNav{ display:flex; gap:8px; }
+
+    .calGrid{
+      display:grid; grid-template-columns: repeat(7, 1fr);
+      gap:8px; border:1px solid var(--line);
+      border-radius:18px; padding:10px;
+      background:rgba(18,22,34,0.55);
+    }
+    .dow{ color:var(--muted); font-size:11px; padding:4px 6px; text-transform:uppercase; letter-spacing:.6px; }
+    .day{
+      min-height:90px;
       border:1px solid rgba(34,40,58,0.7);
-      border-radius: 14px;
-      padding: 8px;
+      border-radius:14px;
+      padding:8px;
       cursor:pointer;
-      background: rgba(255,255,255,0.01);
+      background:rgba(255,255,255,0.01);
     }
-    .day:hover { border-color: rgba(122,162,255,0.35); }
-    .day.muted { opacity: .45; }
-    .dayNum { font-size: 12px; color: var(--muted); }
-    .dots { display:flex; gap:4px; flex-wrap:wrap; margin-top: 6px; }
-    .dot { width:8px; height:8px; border-radius:999px; border:1px solid var(--line); }
-    .dot.sports { border-color: rgba(122,162,255,0.65); }
-    .dot.tcg { border-color: rgba(255,122,200,0.65); }
-    .dot.collectibles { border-color: rgba(120,255,200,0.55); }
+    .day:hover{ border-color:rgba(122,162,255,0.35); }
+    .day.muted{ opacity:.45; }
+    .dayNum{ font-size:12px; color:var(--muted); }
+    .dots{ display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+    .dot{ width:8px; height:8px; border-radius:999px; border:1px solid var(--line); }
+    .dot.sports{ border-color:rgba(122,162,255,0.65); }
+    .dot.tcg{ border-color:rgba(255,122,200,0.65); }
+    .dot.collectibles{ border-color:rgba(120,255,200,0.55); }
 
-    .drawer {
-      margin-top: 12px;
+    .drawer{
+      margin-top:12px;
       border:1px solid var(--line);
-      border-radius: 18px;
-      padding: 12px;
-      background: rgba(18,22,34,0.65);
+      border-radius:18px;
+      padding:12px;
+      background:rgba(18,22,34,0.65);
     }
-    .drawerTitle { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
-    .drawerTitle b { font-size: 14px; }
-    .mini { font-size: 12px; color: var(--muted); }
-    .drawerList { margin-top: 10px; display:grid; gap:10px; }
+    .drawerTitle{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+    .drawerTitle b{ font-size:14px; }
+    .mini{ font-size:12px; color:var(--muted); }
+    .drawerList{ margin-top:10px; display:grid; gap:10px; }
 
-    .empty { padding: 18px; border:1px dashed var(--line); border-radius: 18px; color: var(--muted); }
+    .empty{ padding:18px; border:1px dashed var(--line); border-radius:18px; color:var(--muted); }
 
-    footer { margin-top: 18px; color: var(--muted); font-size: 12px; line-height:1.5; }
-
-    @media (max-width: 980px) {
-      .controls { grid-template-columns: 1fr 1fr; }
-      .eventCard { grid-template-columns: 1fr; }
-      .mapPane { border-left:0; border-top:1px solid var(--line); min-height: 220px; }
+    @media (max-width: 980px){
+      .controls{ grid-template-columns:1fr 1fr; }
+      .eventCard{ grid-template-columns:1fr; }
+      .mapPane{ border-left:0; border-top:1px solid var(--line); min-height:220px; }
     }
-    @media (max-width: 620px) {
-      .controls { grid-template-columns: 1fr; }
-      .day { min-height: 78px; }
+    @media (max-width: 620px){
+      .controls{ grid-template-columns:1fr; }
+      .day{ min-height:78px; }
     }
   </style>
 </head>
 <body>
 <header>
-  <h1>Minnesota Sports Card Shows</h1>
-  <div class="sub">
-    Toggle between list + calendar. List view includes a map preview for each show (no API key required).
-  </div>
+  <h1>Midwest Card Shows</h1>
+  <div class="sub">All shows live in <code>events.json</code>. Filter by state/city/category; view in list or calendar.</div>
 </header>
 
 <div class="wrap">
-  <!-- Step 1: Toggle -->
   <div class="tabs">
     <button class="tab active" id="tabList">List</button>
     <button class="tab" id="tabCal">Calendar</button>
   </div>
 
-  <!-- Filters (apply to both views) -->
   <div class="controls">
-    <input id="q" placeholder="Search (e.g., 'Maplewood', 'RiverCentre', 'Shakopee')" />
-    <select id="city">
-      <option value="">All cities</option>
-    </select>
-    <select id="type">
+    <input id="q" placeholder="Search (venue, city, address, title…)" />
+    <select id="state"><option value="">All states</option></select>
+    <select id="city"><option value="">All cities</option></select>
+    <select id="category">
       <option value="">All categories</option>
       <option value="sports">Sports</option>
       <option value="tcg">TCG</option>
@@ -230,29 +199,23 @@
 
   <div class="meta">
     <div class="pill" id="countPill">0 events</div>
-    <div class="pill">Time zone: America/Chicago</div>
+    <div class="pill">Tip: add <code>?v=7</code> to the URL to bust cache after changes</div>
   </div>
 
-  <!-- LIST VIEW -->
-  <div class="listWrap active" id="listWrap">
-    <div id="list" class="listGrid"></div>
-  </div>
+  <div class="listWrap active" id="listWrap"><div id="list" class="listGrid"></div></div>
 
-  <!-- CALENDAR VIEW -->
   <div class="calWrap" id="calWrap">
     <div class="calHeader">
       <div class="calTitle" id="calTitle">Month</div>
       <div class="calNav">
-        <!-- Step 3: Month navigation -->
         <button id="prevMonth">◀</button>
         <button id="today">Today</button>
         <button id="nextMonth">▶</button>
       </div>
     </div>
-
     <div class="calGrid" id="calGrid"></div>
 
-    <div class="drawer" id="drawer">
+    <div class="drawer">
       <div class="drawerTitle">
         <b id="drawerDate">Select a day</b>
         <span class="mini" id="drawerMeta"></span>
@@ -262,59 +225,16 @@
       </div>
     </div>
   </div>
-
-  <footer>
-    Tip: If a map doesn’t render, open the “Map” link (it will always work).
-  </footer>
 </div>
 
 <script>
-/**
- * Minimal example dataset.
- * You can add more events here. For recurring events, add multiple entries or build a generator later.
- * Required: title, type, venue, address, city, start, end (or null), url, last_verified
- */
-const EVENTS = [
-  {
-    title: "Sports Card Show at the Bowl",
-    type: "sports",
-    venue: "Shakopee Bowl",
-    address: "1224 3rd Ave W, Shakopee, MN 55379",
-    city: "Shakopee",
-    start: "2026-02-22T09:00:00-06:00",
-    end:   "2026-02-22T11:00:00-06:00",
-    url: "https://shakopeebowl.com/sports-card-show",
-    last_verified: "2026-02-17"
-  },
-  {
-    title: "Twin Cities Sports Collectors Club Show",
-    type: "sports",
-    venue: "Bloomington Armory",
-    address: "3300 W 98th St, Bloomington, MN 55431",
-    city: "Bloomington",
-    start: "2026-03-21T09:00:00-05:00",
-    end:   "2026-03-21T16:00:00-05:00",
-    url: "https://www.tcscc.org/",
-    last_verified: "2026-02-17"
-  },
-  {
-    title: "Minnesota Card Show (Apr 2026)",
-    type: "collectibles",
-    venue: "Saint Paul RiverCentre",
-    address: "175 Kellogg Blvd, St Paul, MN 55102",
-    city: "St. Paul",
-    start: "2026-04-16T09:00:00-05:00",
-    end:   "2026-04-19T15:00:00-05:00",
-    url: "https://www.cardshowmn.com/event-details/minnesota-card-show-2026-april",
-    last_verified: "2026-02-17",
-    notes: "Multi-day time range; confirm daily hours on organizer page."
-  }
-];
+let EVENTS = [];
 
-// -------- DOM --------
+// ---------- DOM ----------
 const $q = document.getElementById('q');
+const $state = document.getElementById('state');
 const $city = document.getElementById('city');
-const $type = document.getElementById('type');
+const $category = document.getElementById('category');
 const $sort = document.getElementById('sort');
 const $countPill = document.getElementById('countPill');
 
@@ -335,85 +255,82 @@ const $drawerDate = document.getElementById('drawerDate');
 const $drawerMeta = document.getElementById('drawerMeta');
 const $drawerList = document.getElementById('drawerList');
 
-// -------- helpers --------
-function uniq(arr) { return [...new Set(arr)].sort((a,b)=>a.localeCompare(b)); }
+// ---------- helpers ----------
+function uniq(arr){ return [...new Set(arr)].sort((a,b)=>a.localeCompare(b)); }
 
-function formatWhen(ev) {
+function formatWhen(ev){
   const start = ev.start ? new Date(ev.start) : null;
   const end = ev.end ? new Date(ev.end) : null;
-  if (!start) return "TBD";
-
-  const dateFmt = new Intl.DateTimeFormat('en-US', { weekday:'short', year:'numeric', month:'short', day:'2-digit' });
-  const timeFmt = new Intl.DateTimeFormat('en-US', { hour:'numeric', minute:'2-digit' });
+  if(!start) return "TBD";
+  const dateFmt = new Intl.DateTimeFormat('en-US',{ weekday:'short', year:'numeric', month:'short', day:'2-digit' });
+  const timeFmt = new Intl.DateTimeFormat('en-US',{ hour:'numeric', minute:'2-digit' });
 
   const d = dateFmt.format(start);
   const t1 = timeFmt.format(start);
-
-  if (!end) return `${d} • ${t1} – TBD`;
-
+  if(!end) return `${d} • ${t1} – TBD`;
   const sameDay = start.toDateString() === end.toDateString();
-  if (sameDay) return `${d} • ${t1} – ${timeFmt.format(end)}`;
-
+  if(sameDay) return `${d} • ${t1} – ${timeFmt.format(end)}`;
   return `${dateFmt.format(start)} ${timeFmt.format(start)} → ${dateFmt.format(end)} ${timeFmt.format(end)}`;
 }
 
-function daysSince(dateStr) {
-  if (!dateStr) return Infinity;
+function daysSince(dateStr){
+  if(!dateStr) return Infinity;
   const d = new Date(dateStr + "T00:00:00");
   const now = new Date();
   return Math.floor((now - d) / (1000*60*60*24));
 }
-
-function freshnessBadge(lastVerified) {
+function freshnessBadge(lastVerified){
   const d = daysSince(lastVerified);
-  if (!isFinite(d)) return { cls:"stale", label:"Unverified" };
-  if (d <= 30) return { cls:"fresh", label:`Fresh (${d}d)` };
-  if (d <= 90) return { cls:"aging", label:`Aging (${d}d)` };
+  if(!isFinite(d)) return { cls:"stale", label:"Unverified" };
+  if(d <= 30) return { cls:"fresh", label:`Fresh (${d}d)` };
+  if(d <= 90) return { cls:"aging", label:`Aging (${d}d)` };
   return { cls:"stale", label:`Stale (${d}d)` };
 }
 
-function googleMapsEmbedSrc(query) {
-  // No API key required; uses public embed endpoint.
-  // Note: Some environments can block embeds; the "Map" link will still work.
-  const q = encodeURIComponent(query);
-  return `https://www.google.com/maps?q=${q}&output=embed`;
+function osmStaticMapUrl(lat, lon){
+  // Free static map (no API key). If this endpoint ever rate-limits, we can swap providers.
+  const center = `${lat},${lon}`;
+  return `https://staticmap.openstreetmap.de/staticmap.php?center=${center}&zoom=13&size=600x360&markers=${center},red-pushpin`;
 }
 
-function googleMapsLink(query) {
-  const q = encodeURIComponent(query);
+function mapsLink(ev){
+  const q = encodeURIComponent(`${ev.venue} ${ev.address}`);
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
-function eventKeyLocalDay(ev) {
-  if (!ev.start) return null;
+function eventKeyLocalDay(ev){
+  if(!ev.start) return null;
   const d = new Date(ev.start);
   const pad = (n)=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 
-// -------- filtering/sorting --------
-function filteredEvents() {
-  const q = ($q.value || "").trim().toLowerCase();
+// ---------- filters ----------
+function filteredEvents(){
+  const q = ($q.value||"").trim().toLowerCase();
+  const state = $state.value;
   const city = $city.value;
-  const type = $type.value;
+  const cat = $category.value;
   const sort = $sort.value;
 
   let items = EVENTS.slice();
 
-  if (q) {
+  if(q){
     items = items.filter(ev =>
       (ev.title||"").toLowerCase().includes(q) ||
       (ev.venue||"").toLowerCase().includes(q) ||
       (ev.address||"").toLowerCase().includes(q) ||
       (ev.city||"").toLowerCase().includes(q) ||
-      (ev.type||"").toLowerCase().includes(q) ||
+      (ev.state||"").toLowerCase().includes(q) ||
+      (ev.category||"").toLowerCase().includes(q) ||
       (ev.notes||"").toLowerCase().includes(q)
     );
   }
-  if (city) items = items.filter(ev => ev.city === city);
-  if (type) items = items.filter(ev => ev.type === type);
+  if(state) items = items.filter(ev => ev.state === state);
+  if(city) items = items.filter(ev => ev.city === city);
+  if(cat) items = items.filter(ev => ev.category === cat);
 
-  items.sort((a,b) => {
+  items.sort((a,b)=>{
     const da = a.start ? new Date(a.start).getTime() : Infinity;
     const db = b.start ? new Date(b.start).getTime() : Infinity;
     return sort === "asc" ? da - db : db - da;
@@ -422,18 +339,24 @@ function filteredEvents() {
   return items;
 }
 
-function initCities() {
-  const cities = uniq(EVENTS.map(e=>e.city).filter(Boolean));
-  for (const c of cities) {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c;
-    $city.appendChild(o);
-  }
+function rebuildDropdowns(){
+  // States
+  const states = uniq(EVENTS.map(e=>e.state).filter(Boolean));
+  const prevState = $state.value;
+  $state.innerHTML = `<option value="">All states</option>` + states.map(s=>`<option value="${s}">${s}</option>`).join("");
+  $state.value = states.includes(prevState) ? prevState : "";
+
+  // Cities (dependent on state)
+  const pool = $state.value ? EVENTS.filter(e=>e.state === $state.value) : EVENTS;
+  const cities = uniq(pool.map(e=>e.city).filter(Boolean));
+  const prevCity = $city.value;
+  $city.innerHTML = `<option value="">All cities</option>` + cities.map(c=>`<option value="${c}">${c}</option>`).join("");
+  $city.value = cities.includes(prevCity) ? prevCity : "";
 }
 
-// -------- Step 1: Toggle views --------
-function setView(view) {
-  if (view === "list") {
+// ---------- view toggle ----------
+function setView(view){
+  if(view === "list"){
     $tabList.classList.add("active");
     $tabCal.classList.remove("active");
     $listWrap.classList.add("active");
@@ -446,17 +369,16 @@ function setView(view) {
     buildCalendar();
   }
 }
-
 $tabList.addEventListener('click', ()=>setView("list"));
 $tabCal.addEventListener('click', ()=>setView("cal"));
 
-// -------- Step 2: List view with map on right --------
-function renderList() {
+// ---------- render list ----------
+function renderList(){
   const items = filteredEvents();
   $countPill.textContent = `${items.length} event${items.length===1?"":"s"}`;
   $list.innerHTML = "";
 
-  if (!items.length) {
+  if(!items.length){
     const d = document.createElement('div');
     d.className = "empty";
     d.textContent = "No events match your filters.";
@@ -464,127 +386,78 @@ function renderList() {
     return;
   }
 
-  for (const ev of items) {
+  for(const ev of items){
     const card = document.createElement('div');
     card.className = "eventCard";
 
     const info = document.createElement('div');
     info.className = "eventInfo";
 
-    const titleRow = document.createElement('div');
-    titleRow.className = "titleRow";
-
-    const left = document.createElement('div');
-    const t = document.createElement('h3');
-    t.className = "title";
-    t.textContent = ev.title;
-
-    const when = document.createElement('div');
-    when.className = "row";
-    when.innerHTML = `<span class="k">When:</span> <span class="v">${formatWhen(ev)}</span>`;
-
-    const where = document.createElement('div');
-    where.className = "row";
-    where.innerHTML = `<span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span>`;
-
-    const ver = document.createElement('div');
-    ver.className = "row";
     const fb = freshnessBadge(ev.last_verified);
-    ver.innerHTML = `<span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span>`;
 
-    const notes = document.createElement('div');
-    if (ev.notes) {
-      notes.className = "row";
-      notes.innerHTML = `<span class="k">Notes:</span> <span class="v">${ev.notes}</span>`;
-    }
-
-    left.appendChild(t);
-    left.appendChild(when);
-    left.appendChild(where);
-    left.appendChild(ver);
-    if (ev.notes) left.appendChild(notes);
-
-    const right = document.createElement('div');
-    right.className = "tags";
-
-    const tag = document.createElement('span');
-    tag.className = `tag ${ev.type || ""}`;
-    tag.textContent = (ev.type || "show").toUpperCase();
-
-    const badge = document.createElement('span');
-    badge.className = `badge ${fb.cls}`;
-    badge.textContent = fb.label;
-
-    right.appendChild(tag);
-    right.appendChild(badge);
-
-    titleRow.appendChild(left);
-    titleRow.appendChild(right);
-
-    const actions = document.createElement('div');
-    actions.className = "actions";
-
-    const query = `${ev.venue} ${ev.address}`;
-    const mapA = document.createElement('a');
-    mapA.className = "action";
-    mapA.href = googleMapsLink(query);
-    mapA.target = "_blank";
-    mapA.rel = "noopener noreferrer";
-    mapA.textContent = "Map";
-
-    const orgA = document.createElement('a');
-    orgA.className = "action";
-    orgA.href = ev.url || "#";
-    orgA.target = "_blank";
-    orgA.rel = "noopener noreferrer";
-    orgA.textContent = "Organizer";
-
-    actions.appendChild(mapA);
-    if (ev.url) actions.appendChild(orgA);
-
-    info.appendChild(titleRow);
-    info.appendChild(actions);
+    info.innerHTML = `
+      <div class="titleRow">
+        <div>
+          <h3 class="title">${ev.title}</h3>
+          <div class="row"><span class="k">When:</span> <span class="v">${formatWhen(ev)}</span></div>
+          <div class="row"><span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span></div>
+          <div class="row"><span class="k">Area:</span> <span class="v">${ev.city}, ${ev.state}</span></div>
+          <div class="row"><span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span></div>
+          ${ev.notes ? `<div class="row"><span class="k">Notes:</span> <span class="v">${ev.notes}</span></div>` : ""}
+          <div class="actions">
+            <a class="action" href="${mapsLink(ev)}" target="_blank" rel="noopener noreferrer">Map</a>
+            ${ev.url ? `<a class="action" href="${ev.url}" target="_blank" rel="noopener noreferrer">Organizer</a>` : ""}
+          </div>
+        </div>
+        <div class="rightBadges">
+          <span class="tag ${ev.category || ""}">${(ev.category || "show").toUpperCase()}</span>
+          <span class="badge ${fb.cls}">${fb.label}</span>
+        </div>
+      </div>
+    `;
 
     const mapPane = document.createElement('div');
     mapPane.className = "mapPane";
 
-    const overlay = document.createElement('div');
-    overlay.className = "mapOverlay";
-    overlay.textContent = "Map preview";
+    if(typeof ev.lat === "number" && typeof ev.lon === "number"){
+      const img = document.createElement('img');
+      img.loading = "lazy";
+      img.alt = `Map preview for ${ev.venue}`;
+      img.src = osmStaticMapUrl(ev.lat, ev.lon);
 
-    const iframe = document.createElement('iframe');
-    iframe.loading = "lazy";
-    iframe.referrerPolicy = "no-referrer-when-downgrade";
-    iframe.src = googleMapsEmbedSrc(query);
-    iframe.title = `Map - ${ev.title}`;
+      const overlay = document.createElement('div');
+      overlay.className = "mapOverlay";
+      overlay.textContent = "Map preview";
 
-    mapPane.appendChild(iframe);
-    mapPane.appendChild(overlay);
+      mapPane.appendChild(img);
+      mapPane.appendChild(overlay);
+    } else {
+      mapPane.innerHTML = `<div class="mapMissing">No map image yet (add <code>lat</code>/<code>lon</code> in <code>events.json</code>).<br/>Use the “Map” button.</div>`;
+    }
 
     card.appendChild(info);
     card.appendChild(mapPane);
-
     $list.appendChild(card);
   }
 }
 
-// -------- Step 3: Calendar with month navigation --------
+// ---------- calendar ----------
 let calCursor = new Date();
 calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth(), 1);
 let selectedDayKey = null;
 
-function monthLabel(d) {
-  return new Intl.DateTimeFormat('en-US', { month:'long', year:'numeric' }).format(d);
+function monthLabel(d){
+  return new Intl.DateTimeFormat('en-US',{ month:'long', year:'numeric' }).format(d);
 }
 
-function buildCalendar() {
+function buildCalendar(){
   const items = filteredEvents();
 
   const byDay = new Map();
-  for (const ev of items) {
+  for(const ev of items){
     const k = eventKeyLocalDay(ev);
-    if (!k) continue;
-    if (!byDay.has(k)) byDay.set(k, []);
+    if(!k) continue;
+    if(!byDay.has(k)) byDay.set(k, []);
     byDay.get(k).push(ev);
   }
 
@@ -592,7 +465,7 @@ function buildCalendar() {
   $calGrid.innerHTML = "";
 
   const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  for (const d of dows) {
+  for(const d of dows){
     const el = document.createElement('div');
     el.className = "dow";
     el.textContent = d;
@@ -602,9 +475,9 @@ function buildCalendar() {
   const first = new Date(calCursor.getFullYear(), calCursor.getMonth(), 1);
   const startDow = first.getDay();
   const startDate = new Date(first);
-  startDate.setDate(first.getDate() - startDow); // Sunday before the 1st
+  startDate.setDate(first.getDate() - startDow);
 
-  for (let i=0; i<42; i++) {
+  for(let i=0;i<42;i++){
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     const inMonth = d.getMonth() === calCursor.getMonth();
@@ -623,43 +496,40 @@ function buildCalendar() {
     dots.className = "dots";
 
     const evs = byDay.get(key) || [];
-    for (const ev of evs.slice(0, 6)) {
+    for(const ev of evs.slice(0,6)){
       const dot = document.createElement('div');
-      dot.className = "dot " + (ev.type || "");
+      dot.className = "dot " + (ev.category || "");
       dots.appendChild(dot);
     }
 
     cell.appendChild(num);
-    if (evs.length) cell.appendChild(dots);
+    if(evs.length) cell.appendChild(dots);
 
     cell.addEventListener('click', ()=>selectDay(key, evs));
-
     $calGrid.appendChild(cell);
   }
 
-  // auto-select a day
-  if (!selectedDayKey) {
+  if(!selectedDayKey){
     const now = new Date();
     const pad = (n)=>String(n).padStart(2,'0');
     const todayKey = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
     const monthPrefix = `${calCursor.getFullYear()}-${pad(calCursor.getMonth()+1)}`;
 
-    if (todayKey.startsWith(monthPrefix)) {
-      selectDay(todayKey, byDay.get(todayKey) || []);
-    } else {
-      const firstKeyWithEvents = [...byDay.keys()].find(k => k.startsWith(monthPrefix));
-      if (firstKeyWithEvents) selectDay(firstKeyWithEvents, byDay.get(firstKeyWithEvents) || []);
+    if(todayKey.startsWith(monthPrefix)) selectDay(todayKey, byDay.get(todayKey) || []);
+    else {
+      const firstKeyWithEvents = [...byDay.keys()].find(k=>k.startsWith(monthPrefix));
+      if(firstKeyWithEvents) selectDay(firstKeyWithEvents, byDay.get(firstKeyWithEvents) || []);
       else selectDay(null, []);
     }
   } else {
-    selectDay(selectedDayKey, byDay.get(selectedDayKey) || [], true);
+    selectDay(selectedDayKey, byDay.get(selectedDayKey) || []);
   }
 }
 
-function selectDay(key, evs) {
+function selectDay(key, evs){
   selectedDayKey = key;
 
-  if (!key) {
+  if(!key){
     $drawerDate.textContent = "Select a day";
     $drawerMeta.textContent = "";
     $drawerList.innerHTML = `<div class="mini">No day selected.</div>`;
@@ -667,50 +537,46 @@ function selectDay(key, evs) {
   }
 
   const d = new Date(key + "T00:00:00");
-  const label = new Intl.DateTimeFormat('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }).format(d);
+  const label = new Intl.DateTimeFormat('en-US',{ weekday:'long', year:'numeric', month:'long', day:'numeric' }).format(d);
   $drawerDate.textContent = label;
   $drawerMeta.textContent = `${evs.length} event${evs.length===1?"":"s"}`;
 
   $drawerList.innerHTML = "";
-  if (!evs.length) {
+  if(!evs.length){
     $drawerList.innerHTML = `<div class="mini">No events on this day (with current filters).</div>`;
     return;
   }
 
   evs = evs.slice().sort((a,b)=>new Date(a.start).getTime() - new Date(b.start).getTime());
-
-  for (const ev of evs) {
-    const box = document.createElement('div');
-    box.className = "card";
-    box.style.boxShadow = "none";
-    box.style.background = "rgba(18,22,34,0.55)";
-
+  for(const ev of evs){
     const fb = freshnessBadge(ev.last_verified);
+    const box = document.createElement('div');
+    box.style.border = "1px solid var(--line)";
+    box.style.borderRadius = "14px";
+    box.style.padding = "10px";
+    box.style.background = "rgba(18,22,34,0.35)";
 
     box.innerHTML = `
-      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:flex-start;">
+      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
         <div>
-          <div class="title" style="margin:0 0 6px;">${ev.title}</div>
-          <div class="row"><span class="k">When:</span> <span class="v">${formatWhen(ev)}</span></div>
-          <div class="row"><span class="k">Where:</span> <span class="v">${ev.venue} — ${ev.address}</span></div>
-          <div class="row"><span class="k">Last verified:</span> <span class="v">${ev.last_verified || "Unknown"}</span></div>
+          <div style="font-size:14px; margin-bottom:6px;">${ev.title}</div>
+          <div class="mini">${formatWhen(ev)} • ${ev.city}, ${ev.state}</div>
+          <div class="mini">${ev.venue}</div>
         </div>
-        <div class="tags">
-          <span class="tag ${ev.type || ""}">${(ev.type || "show").toUpperCase()}</span>
+        <div class="rightBadges">
+          <span class="tag ${ev.category||""}">${(ev.category||"show").toUpperCase()}</span>
           <span class="badge ${fb.cls}">${fb.label}</span>
         </div>
       </div>
-      <div class="actions">
-        <a class="action" href="${googleMapsLink(ev.venue + " " + ev.address)}" target="_blank" rel="noopener noreferrer">Map</a>
+      <div class="actions" style="margin-top:10px;">
+        <a class="action" href="${mapsLink(ev)}" target="_blank" rel="noopener noreferrer">Map</a>
         ${ev.url ? `<a class="action" href="${ev.url}" target="_blank" rel="noopener noreferrer">Organizer</a>` : ""}
       </div>
     `;
-
     $drawerList.appendChild(box);
   }
 }
 
-// Month nav buttons
 $prevMonth.addEventListener('click', ()=>{
   calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()-1, 1);
   selectedDayKey = null;
@@ -728,19 +594,30 @@ $todayBtn.addEventListener('click', ()=>{
   buildCalendar();
 });
 
-// Inputs re-render both views
-function rerenderAll() {
+// ---------- wire inputs ----------
+function rerenderAll(){
+  rebuildDropdowns();
   renderList();
-  if ($calWrap.classList.contains("active")) buildCalendar();
+  if($calWrap.classList.contains("active")) buildCalendar();
 }
 $q.addEventListener('input', rerenderAll);
+$state.addEventListener('change', rerenderAll);
 $city.addEventListener('change', rerenderAll);
-$type.addEventListener('change', rerenderAll);
+$category.addEventListener('change', rerenderAll);
 $sort.addEventListener('change', rerenderAll);
 
-// init
-initCities();
-renderList();
+// ---------- load data ----------
+async function loadEvents(){
+  const res = await fetch("./events.json", { cache: "no-store" });
+  const data = await res.json();
+  EVENTS = (data.events || []).filter(e => e && e.title && e.start);
+  rebuildDropdowns();
+  renderList();
+}
+loadEvents().catch(err=>{
+  console.error(err);
+  $list.innerHTML = `<div class="empty">Could not load <code>events.json</code>. Make sure it exists in the repo root.</div>`;
+});
 </script>
 </body>
 </html>
