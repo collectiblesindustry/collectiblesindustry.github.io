@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minnesota Sports Card Shows</title>
+<meta name="description" content="Complete calendar of Minnesota sports card shows including dates, times, locations, and last verified status.">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #0f172a;
+    color: #f1f5f9;
+}
+header {
+    padding: 20px;
+    text-align: center;
+    background: #111827;
+}
+h1 {
+    margin: 0;
+}
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+.card h3 {
+    margin-top: 0;
+}
+.badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+.fresh { background: #065f46; }
+.aging { background: #92400e; }
+.stale { background: #7f1d1d; }
+a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+}
+.day {
+    background: #1e293b;
+    padding: 10px;
+    border-radius: 6px;
+    min-height: 80px;
+}
+.day strong {
+    display: block;
+    margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Minnesota Sports Card Shows</h1>
+<p>Complete List + Calendar View</p>
+</header>
+
+<div class="container">
+
+<h2>Upcoming Shows</h2>
+
+<div id="events"></div>
+
+<h2>Simple Month Calendar</h2>
+<div class="calendar" id="calendar"></div>
+
+</div>
+
+<script>
+
+const EVENTS = [
+{
+    title: "Sports Card Show at the Bowl",
+    venue: "Shakopee Bowl",
+    address: "1224 3rd Ave W, Shakopee, MN",
+    date: "2026-02-22",
+    time: "9:00 AM – 11:00 AM",
+    type: "Sports",
+    url: "https://shakopeebowl.com/sports-card-show",
+    last_verified: "2026-02-17"
+},
+{
+    title: "Minnesota Card Show",
+    venue: "Saint Paul RiverCentre",
+    address: "175 Kellogg Blvd, St Paul, MN",
+    date: "2026-04-16",
+    time: "9:00 AM – 3:00 PM",
+    type: "Sports & TCG",
+    url: "https://www.cardshowmn.com/",
+    last_verified: "2026-02-17"
+},
+{
+    title: "Twin Cities Sports Collectors Club Show",
+    venue: "Bloomington Armory",
+    address: "3300 W 98th St, Bloomington, MN",
+    date: "2026-03-21",
+    time: "9:00 AM – 4:00 PM",
+    type: "Sports",
+    url: "https://www.tcscc.org/",
+    last_verified: "2026-02-17"
+}
+];
+
+function daysSince(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+}
+
+function getFreshnessClass(days) {
+    if (days <= 30) return "fresh";
+    if (days <= 90) return "aging";
+    return "stale";
+}
+
+function renderEvents() {
+    const container = document.getElementById("events");
+    EVENTS.forEach(event => {
+        const days = daysSince(event.last_verified);
+        const freshness = getFreshnessClass(days);
+
+        container.innerHTML += `
+            <div class="card">
+                <h3>${event.title}</h3>
+                <p><strong>Date:</strong> ${event.date}</p>
+                <p><strong>Time:</strong> ${event.time}</p>
+                <p><strong>Location:</strong> ${event.venue}, ${event.address}</p>
+                <p><strong>Type:</strong> ${event.type}</p>
+                <p>
+                    <span class="badge ${freshness}">
+                        Last Verified: ${event.last_verified} (${days} days ago)
+                    </span>
+                </p>
+                <p><a href="${event.url}" target="_blank">Organizer Website</a></p>
+            </div>
+        `;
+    });
+}
+
+function renderCalendar() {
+    const calendar = document.getElementById("calendar");
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        calendar.innerHTML += `<div></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const event = EVENTS.find(e => e.date === dateStr);
+
+        calendar.innerHTML += `
+            <div class="day">
+                <strong>${d}</strong>
+                ${event ? `<small>${event.title}</small>` : ""}
+            </div>
+        `;
+    }
+}
+
+renderEvents();
+renderCalendar();
+
+</script>
+
+</body>
+</html>
