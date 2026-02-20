@@ -1,0 +1,122 @@
+{
+  "events": [
+    {
+      "id": "mn-shakopee-bowl-2026-02-22",
+      "title": "Sports Card Show at the Bowl",
+      "category": "sports",
+      "venue": "Shakopee Bowl",
+      "address": "3020 133rd St W, Shakopee, MN 55379",
+      "city": "Shakopee",
+      "state": "MN",
+      "start": "2026-02-22T09:00:00-06:00",
+      "end": "2026-02-22T11:00:00-06:00",
+      "lat": 44.7597,
+      "lon": -93.57963,
+      "url": "https://shakopeebowl.com/sports-card-show",
+      "last_verified": "2026-02-17"
+    },
+    {
+      "id": "mn-bloomington-armory-2026-03-21",
+      "title": "Twin Cities Sports Collectors Club Show",
+      "category": "sports",
+      "venue": "Bloomington Armory",
+      "address": "3300 W 98th St, Bloomington, MN 55431",
+      "city": "Bloomington",
+      "state": "MN",
+      "start": "2026-03-21T09:00:00-05:00",
+      "end": "2026-03-21T16:00:00-05:00",
+      "lat": 44.82708,
+      "lon": -93.32131,
+      "url": "https://www.tcscc.org/",
+      "last_verified": "2026-02-17"
+    },
+    {
+      "id": "mn-stpaul-rivercentre-2026-04-16",
+      "title": "Minnesota Card Show (Apr 2026)",
+      "category": "collectibles",
+      "venue": "Saint Paul RiverCentre",
+      "address": "175 W Kellogg Blvd, St Paul, MN 55102",
+      "city": "St. Paul",
+      "state": "MN",
+      "start": "2026-04-16T09:00:00-05:00",
+      "end": "2026-04-19T15:00:00-05:00",
+      "lat": 44.94311,
+      "lon": -93.10003,
+      "url": "https://www.cardshowmn.com/event-details/minnesota-card-show-2026-april",
+      "last_verified": "2026-02-17",
+      "notes": "Multi-day range; confirm daily hours on organizer page."
+    },
+
+    {
+      "id": "wi-baird-center-2026-01-30",
+      "title": "Wisconsin Card Show (3-Day)",
+      "category": "sports",
+      "venue": "Baird Center",
+      "address": "400 W Wisconsin Ave, Milwaukee, WI 53203",
+      "city": "Milwaukee",
+      "state": "WI",
+      "start": "2026-01-30T15:00:00-06:00",
+      "end": "2026-02-01T17:00:00-06:00",
+      "lat": 43.03972,
+      "lon": -87.91722,
+      "url": "https://www.wisconsincardshow.com/event-details/wisconsin-card-show-3-day-show-2026-01-30-15-00",
+      "last_verified": "2026-02-17",
+      "notes": "Time range shown as a multi-day event; verify daily hours."
+    },
+    {
+      "id": "il-collinsville-2026-02-08",
+      "title": "Collinsville Card Show",
+      "category": "collectibles",
+      "venue": "Collinsville (see organizer page)",
+      "address": "Collinsville, IL 62234",
+      "city": "Collinsville",
+      "state": "IL",
+      "start": "2026-02-08T09:00:00-06:00",
+      "end": "2026-02-08T15:00:00-06:00",
+      "url": "https://collinsvillecardshow.com/event/collinsville-card-show-february-8-2026/",
+      "last_verified": "2026-02-17",
+      "notes": "Add exact venue address + lat/lon once confirmed on organizer page."
+    },
+    {
+      "id": "il-countryside-2026-02-15",
+      "title": "Midwest Collectors Fest",
+      "category": "collectibles",
+      "venue": "Countryside Banquets",
+      "address": "6200 S Joliet Rd, Countryside, IL",
+      "city": "Countryside",
+      "state": "IL",
+      "start": "2026-02-15T09:00:00-06:00",
+      "end": "2026-02-15T15:00:00-06:00",
+      "url": "https://midwestsportsbuffet.com/pages/midwest-collectors-fest",
+      "last_verified": "2026-02-17"
+    },
+
+    {
+      "id": "in-shipshewana-2026-03-06",
+      "title": "Shipshewana Card Fest",
+      "category": "sports",
+      "venue": "Shipshewana (see organizer page)",
+      "address": "Shipshewana, IN 46565",
+      "city": "Shipshewana",
+      "state": "IN",
+      "start": "2026-03-06T10:00:00-05:00",
+      "end": "2026-03-07T17:00:00-05:00",
+      "url": "https://visitshipshewana.org/event/shipshewana-card-fest-2/2026-03-06/",
+      "last_verified": "2026-02-17",
+      "notes": "Add exact venue address + lat/lon once confirmed on organizer page."
+    },
+    {
+      "id": "oh-grove-city-2026-02-01",
+      "title": "Grove City Card Fest",
+      "category": "collectibles",
+      "venue": "Grove City Events (see organizer page)",
+      "address": "Grove City, OH",
+      "city": "Grove City",
+      "state": "OH",
+      "start": "2026-02-01T09:00:00-05:00",
+      "end": "2026-02-01T15:00:00-05:00",
+      "url": "https://grovecityevents.com/event/grove-city-card-fest-2026",
+      "last_verified": "2026-02-17"
+    }
+  ]
+}
